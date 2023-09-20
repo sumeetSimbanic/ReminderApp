@@ -9,10 +9,23 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/webpack-config": "^19.0.0",
+    "@react-native-community/datetimepicker": "^7.2.0",
+    "@react-native-picker/picker": "^2.5.0",
+    "@react-navigation/native": "^6.1.7",
+    "@react-navigation/stack": "^6.3.17",
     "expo": "~49.0.10",
+    "expo-background-fetch": "~11.3.0",
+    "expo-notifications": "~0.20.1",
+    "expo-permissions": "~14.2.1",
     "expo-status-bar": "~1.6.0",
+    "expo-task-manager": "~11.3.0",
     "react": "18.2.0",
-    "react-native": "0.72.4"
+    "react-dom": "18.2.0",
+    "react-native": "0.72.3",
+    "react-native-modal-datetime-picker": "^17.1.0",
+    "react-native-picker-select": "^8.1.0",
+    "react-native-web": "~0.19.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -23,6 +23,19 @@
         "backgroundColor": "#ffffff"
       }
     },
+    "permissions": {
+      "notifications": {
+        "ios": {
+          "allowAlert": true,
+          "allowBadge": true,
+          "allowSound": true
+        },
+        "android": {
+          "channelId": "your-notification-channel-id"
+        }
+      }
+    },
+
     "web": {
       "favicon": "./assets/favicon.png"
     }
