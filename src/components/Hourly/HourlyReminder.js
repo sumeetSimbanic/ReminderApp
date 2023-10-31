@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, ToastAndroid, TextInput, FlatList, Alert } from 'react-native';
+import { View, Text, Button, ToastAndroid, TextInput, FlatList } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import * as Notifications from 'expo-notifications';
+import { Audio } from 'expo-av';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function HourlyReminder() {
   const [startDateTime, setStartDateTime] = useState(null);
@@ -10,6 +13,30 @@ export default function HourlyReminder() {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [reminders, setReminders] = useState([]);
+  const [sound, setSound] = useState();
+  const navigation = useNavigation();
+
+
+  useEffect(() => {
+    const loadSound = async () => {
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          require('../../../assets/BestTune.mp3')
+        );
+        setSound(sound);
+      } catch (error) {
+        console.error('Error loading sound:', error);
+      }
+    };
+    
+    loadSound();
+
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, []);
 
   const showDateTimePicker = (type) => {
     if (type === 'start') {
@@ -36,7 +63,7 @@ export default function HourlyReminder() {
     }
   };
 
-  const setReminder = async () => {
+  const scheduleReminders = async () => {
     if (!startDateTime || !endDateTime || !intervalMinutes) {
       ToastAndroid.show('Please select start date and time, end date and time, and interval', ToastAndroid.SHORT);
       return;
@@ -44,6 +71,14 @@ export default function HourlyReminder() {
 
     if (endDateTime <= startDateTime) {
       ToastAndroid.show('End date and time must be after start date and time', ToastAndroid.SHORT);
+      return;
+    }
+
+    // Check if the start and end dates are on the same day
+    const startDay = startDateTime.getDate();
+    const endDay = endDateTime.getDate();
+    if (startDay !== endDay) {
+      ToastAndroid.show('Reminders can only be set for one day', ToastAndroid.SHORT);
       return;
     }
 
@@ -67,15 +102,28 @@ export default function HourlyReminder() {
       const reminderTime = firstReminderTime + i * intervalMilliseconds;
 
       // Set a notification for each reminder time
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Reminder',
-          body: 'It\'s time for your task!',
-        },
-        trigger: {
-          date: new Date(reminderTime),
-        },
-      });
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Alarm',
+            body: 'Time to wake up!',
+          },
+          trigger: {
+            date: new Date(reminderTime),
+          },
+        });
+      } catch (error) {
+        console.error('Error scheduling notification:', error);
+      }
+
+      // Play the sound when the alarm goes off
+      if (sound) {
+        // Play the sound when the alarm goes off
+        setTimeout(async () => {
+          await sound.replayAsync();
+          navigation.navigate('Hourly');
+        }, reminderTime - now);
+      }
 
       // Add the reminder details to the array
       newReminders.push({
@@ -87,23 +135,12 @@ export default function HourlyReminder() {
     // Update the reminders array with the new reminders
     setReminders(newReminders);
 
-    ToastAndroid.show('Reminders set successfully', ToastAndroid.SHORT);
+    ToastAndroid.show('Alarms set successfully', ToastAndroid.SHORT);
   };
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const now = new Date().getTime();
-      if (startDateTime && now === startDateTime.getTime()) {
-        Alert.alert('Hi Sumeet');
-      }
-    }, 1000); // Check every second for a match
-
-    return () => clearInterval(intervalId); // Clean up the interval on unmount
-  }, [startDateTime]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Set Reminder</Text>
+      <Text>Set Alarm</Text>
       <Button title="Select Start Date and Time" onPress={() => showDateTimePicker('start')} />
       <Text>Start Date and Time: {startDateTime && startDateTime.toLocaleString()}</Text>
       <Button title="Select End Date and Time" onPress={() => showDateTimePicker('end')} />
@@ -115,7 +152,7 @@ export default function HourlyReminder() {
         onChangeText={(text) => setIntervalMinutes(text)}
         style={{ marginTop: 10, paddingHorizontal: 10, height: 40, width: 200, borderColor: 'gray', borderWidth: 1 }}
       />
-      <Button title="Set Reminders" onPress={setReminder} />
+      <Button title="Set Alarms" onPress={scheduleReminders} />
 
       <FlatList
         data={reminders}

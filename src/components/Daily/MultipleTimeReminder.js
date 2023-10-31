@@ -3,7 +3,7 @@ import { View, Text, Button, ToastAndroid, FlatList } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import * as Notifications from 'expo-notifications';
 
-export default function MultipleTimeReminder() {
+export default function DailyMultipleTimeReminder() {
   const [startDateTime, setStartDateTime] = useState(null);
   const [endDateTime, setEndDateTime] = useState(null);
   const [selectedTimes, setSelectedTimes] = useState([]);

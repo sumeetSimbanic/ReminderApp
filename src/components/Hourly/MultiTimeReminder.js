@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, ToastAndroid, TextInput, FlatList } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import * as Notifications from 'expo-notifications';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function MultiTimeReminder() {
   const [selectedTimes, setSelectedTimes] = useState([]);
   const [timeInput, setTimeInput] = useState('');
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [reminders, setReminders] = useState([]);
+  const navigation = useNavigation();
+
 
   useEffect(() => {
     // Check for reminders when the component mounts
@@ -81,8 +85,10 @@ export default function MultiTimeReminder() {
       newReminders.push({
         id: i.toString(),
         time: reminderTime.toLocaleString(),
+
       });
     }
+    
   
     // Update the reminders array with the new reminders
     setReminders(newReminders);
